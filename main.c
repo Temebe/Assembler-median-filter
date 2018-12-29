@@ -1,8 +1,9 @@
 #include <stdio.h>
+#include <string.h>
 
 void median(char *s);
 
-typedef struct BMPHeader {
+typedef struct {
 	unsigned short type;
 	unsigned int size;
 	unsigned short reserved1;
@@ -18,9 +19,10 @@ typedef struct BMPHeader {
 	unsigned int biXPelsPerMeter;
 	unsigned int biYPelsPerMeter;
 	unsigned int biClrUsed;
-	unsigned char	biClrImportant; 
-	unsigned char	biClrRotation;
-	unsigned short biReserved 
+	unsigned int biClrImportant;
+	/*unsigned char biClrImportant; 
+	unsigned char biClrRotation;
+	unsigned short biReserved*/ 
 } BMPHeader;
 
 int error(int msg) {
@@ -46,19 +48,27 @@ int main(int argc, char* argv[]) {
 	FILE *input = 0;
 	BMPHeader inputHeader;
 	int width, height; //our input and output will have these the same
-	
+
 	if(argc<2)
 		return error(-1);
 
-  printf("File name: %s\n", argv[1]);
-	if(input = fopen(argv[1], "rb") == 0)
+	printf("File name: %s\n", argv[1]);
+
+	input = fopen(argv[1], "rb");
+	if(input == 0)
 		return error(-2);
 
 	fread((void*) &inputHeader, sizeof(inputHeader), 1, input);
-	if(inputHeader.type != 0x424D)
+	if(inputHeader.type != 0x4D42)
 		return error(-3);
+	
+	width = inputHeader.biWidth;
+	height = inputHeader.biHeight;
+	printf("Image res: %d x %d\n", width, height);
 
-  median(argv[1]);
+	median(argv[1]);
 	printf("Output file: TODO\n");
-  return 0;
+
+	fclose(input);
+	return 0;
 }
