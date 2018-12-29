@@ -5,9 +5,9 @@ median:
 	push ebp
 	mov ebp, esp
 
+	;code that needs to be done
 	
 end:
-	mov byte [ecx], 0
-	;mov esp, ebp
+	mov esp, ebp
 	pop ebp
 	ret

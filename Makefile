@@ -8,10 +8,10 @@ all:result
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c main.c
-removerng.o: removerng.asm
-	$(ASM) $(AFLAGS) removerng.asm
-result: main.o removerng.o
-	$(CC) $(CFLAGS) main.o removerng.o -o result
+median.o: median.asm
+	$(ASM) $(AFLAGS) median.asm
+result: main.o median.o
+	$(CC) $(CFLAGS) main.o median.o -o result
 clean: 
 	rm *.o
 	rm result
