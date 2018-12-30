@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
-void median(char *s);
+char median(char *s);
 
 typedef struct {
 	unsigned short type;
@@ -47,7 +48,11 @@ int error(int msg) {
 int main(int argc, char* argv[]) { 
 	FILE *input = 0;
 	BMPHeader inputHeader;
+	//char color[] = {0x10, 0x30, 0x20, 0x41, 0x45, 0xab, 0xa2, 0x01}; //pointers for counting 
+	unsigned char *color = (char*) malloc(12);
+	unsigned char result;
 	int width, height; //our input and output will have these the same
+	int i = 0;
 
 	if(argc<2)
 		return error(-1);
@@ -66,7 +71,18 @@ int main(int argc, char* argv[]) {
 	height = inputHeader.biHeight;
 	printf("Image res: %d x %d\n", width, height);
 
-	median(argv[1]);
+	//Test of median
+	//color = {0x10, 0x30, 0x20, 0x41, 0x45, 0xab, 0xa2, 0x01};
+	for(i = 0; i < 9; i++)
+		color[i] = 3*(9-i);
+	for(i = 0; i < 9; i++)
+		printf("%#x, ", color[i]);
+	result = median(color);
+	printf("\n");
+	for(i = 0; i < 9; i++)
+		printf("%#x, ", color[i]);
+	printf("\nMedian: %x\n", result);
+	printf("Size: %d\n", sizeof(result));
 	printf("Output file: TODO\n");
 
 	fclose(input);
