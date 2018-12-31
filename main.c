@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-char median(char *s);
+void median(char *input, char *output, unsigned int width, unsigned int height);
 
 typedef struct {
 	unsigned short type;
@@ -38,6 +38,9 @@ int error(int msg) {
 		case -3:
 			printf("BMP is not BM type.\n");
 			break;
+		case -4:
+			printf("Cannot create result file.\n");
+			break;
 		default:
 			printf("Unknown error.\n");
 			break;
@@ -46,24 +49,24 @@ int error(int msg) {
 }
 
 int main(int argc, char* argv[]) { 
-	FILE *input = 0;
+	FILE *file = 0;
 	BMPHeader inputHeader;
 	//char color[] = {0x10, 0x30, 0x20, 0x41, 0x45, 0xab, 0xa2, 0x01}; //pointers for counting 
 	unsigned char *color = (char*) malloc(12);
-	unsigned char result;
-	int width, height; //our input and output will have these the same
+	unsigned char *img;
+	unsigned char *result;
+	unsigned int width, height; //our input and output will have these the same
 	int i = 0;
 
 	if(argc<2)
 		return error(-1);
-
 	printf("File name: %s\n", argv[1]);
 
-	input = fopen(argv[1], "rb");
-	if(input == 0)
+	file = fopen(argv[1], "rb");
+	if(file == 0)
 		return error(-2);
 
-	fread((void*) &inputHeader, sizeof(inputHeader), 1, input);
+	fread((void*) &inputHeader, sizeof(inputHeader), 1, file);
 	if(inputHeader.type != 0x4D42)
 		return error(-3);
 	
@@ -71,20 +74,23 @@ int main(int argc, char* argv[]) {
 	height = inputHeader.biHeight;
 	printf("Image res: %d x %d\n", width, height);
 
-	//Test of median
-	//color = {0x10, 0x30, 0x20, 0x41, 0x45, 0xab, 0xa2, 0x01};
-	for(i = 0; i < 9; i++)
-		color[i] = 3*(9-i);
-	for(i = 0; i < 9; i++)
-		printf("%#x, ", color[i]);
-	result = median(color);
-	printf("\n");
-	for(i = 0; i < 9; i++)
-		printf("%#x, ", color[i]);
-	printf("\nMedian: %x\n", result);
-	printf("Size: %d\n", sizeof(result));
-	printf("Output file: TODO\n");
+	img = (unsigned char*) malloc(width * height * 3); //We'll need surface times 3 because of 3 colors
+	fread(img, width*height*3, 1, file);
+	fclose(file);
+	file = fopen("result.bmp", "wb");
+	if(file == 0)
+		return error(-4);
 
-	fclose(input);
+	result = (unsigned char*) malloc(width * height * 3);
+	median(img, result, width, height);
+	for(i = 0; i < 9; i++)
+		printf("%#x\n", result[i]);
+	fwrite((void*) &inputHeader, sizeof(inputHeader), 1, file);
+	fwrite(result, width*height*3, 1, file);
+	printf("Output file: result.bmp\n");
+
+	free(img);
+	free(result);
+	fclose(file);
 	return 0;
 }
