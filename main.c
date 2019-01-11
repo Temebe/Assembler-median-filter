@@ -56,7 +56,9 @@ int main(int argc, char* argv[]) {
 	unsigned char *img;
 	unsigned char *result;
 	unsigned int width, height; //our input and output will have these the same
-	int i = 0;
+	unsigned int test_arg = atoi(argv[2]) - 54;
+	unsigned int tab[9];
+	int i = 0, j = 0, pom;
 
 	if(argc<2)
 		return error(-1);
@@ -81,12 +83,32 @@ int main(int argc, char* argv[]) {
 	if(file == 0)
 		return error(-4);
 
+	//Temporary testing machine
+	if(argc > 2) {
+		if(test_arg< width * 3) {
+			printf("%#.2x %#.2x %#.2x\n%#.2x %#.2x %#.2x\n", 
+					img[test_arg + (3 * width) - 3], img[test_arg + (3 * width)], img[test_arg + (3 * width) + 3],
+					img[test_arg - 3], img[test_arg], img[test_arg + 3]);
+		}
+		else {
+			printf(	"%#.2x %#.2x %#.2x\n%#.2x %#.2x %#.2x\n%#.2x %#.2x %#.2x\n", 
+					img[test_arg + (3 * width) - 3], img[test_arg + (3 * width)], img[test_arg + (3 * width) + 3],
+					img[test_arg - 3], img[test_arg], img[test_arg + 3], 
+					img[test_arg - (3 * width) - 3], img[test_arg - (3 * width)], img[test_arg - (3 * width) + 3]);
+					tab[0] = test_arg + (3 * width) - 3;
+		}
+	}
+	//End of temporary
+
 	result = (unsigned char*) malloc(width * height * 3);
 	median(img, result, width, height);
 	for(i = 0; i < 9; i++)
-		printf("%#x\n", result[i]);
+		printf("%#.2x\n", result[i]);
 	fwrite((void*) &inputHeader, sizeof(inputHeader), 1, file);
 	fwrite(result, width*height*3, 1, file);
+	if(argc > 2) {
+		printf("Result in file: %#.2x\n", result[test_arg]);
+	}
 	printf("Output file: result.bmp\n");
 
 	free(img);
