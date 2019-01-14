@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <SFML/Graphics.h>
 
 void median(char *input, char *output, unsigned int width, unsigned int height);
 
@@ -38,9 +39,6 @@ int error(int msg) {
 		case -3:
 			printf("BMP is not BM type.\n");
 			break;
-		case -4:
-			printf("Cannot create result file.\n");
-			break;
 		default:
 			printf("Unknown error.\n");
 			break;
@@ -49,11 +47,14 @@ int error(int msg) {
 }
 
 int main(int argc, char* argv[]) { 
+	sfVideoMode mode;
+    sfRenderWindow* window;
+    sfTexture* texture;
+    sfSprite* sprite;
+	sfEvent event;
 	FILE *file = 0;
 	BMPHeader inputHeader;
-	//char color[] = {0x10, 0x30, 0x20, 0x41, 0x45, 0xab, 0xa2, 0x01}; //pointers for counting 
 	unsigned int width, height; //our input and output will have these the same
-	unsigned char *color = (char*) malloc(12);
 	unsigned char *img;
 	unsigned char *result;
 
@@ -76,19 +77,39 @@ int main(int argc, char* argv[]) {
 	img = (unsigned char*) malloc(width * height * 3); //We'll need surface times 3 because of 3 colors
 	fread(img, width*height*3, 1, file);
 	fclose(file);
-	file = fopen("result.bmp", "wb");
-	if(file == 0)
-		return error(-4);
 
-	result = (unsigned char*) malloc(width * height * 3);
-	median(img, result, width, height);
-	fwrite((void*) &inputHeader, sizeof(inputHeader), 1, file);
-	fwrite(result, width*height*3, 1, file);
-	printf("Output file: result.bmp\n");
+	result = (unsigned char*) malloc(width * height * 3 + sizeof(inputHeader));
+	memcpy(result, &inputHeader, sizeof(inputHeader));
+	median(img, result + sizeof(inputHeader), width, height);
+	
+	// Creating window
+	mode.width = width;
+	mode.height = height;
+	mode.bitsPerPixel = 32;
+	window = sfRenderWindow_create(mode, "Median Filter ", sfResize | sfClose, NULL);
 
-	free(color);
+	texture = sfTexture_createFromMemory(result, width*height*3 + sizeof(inputHeader), NULL);
+	sprite = sfSprite_create();
+    sfSprite_setTexture(sprite, texture, sfTrue);
+
+	while (sfRenderWindow_isOpen(window))
+    {
+        // Process events
+        while (sfRenderWindow_pollEvent(window, &event))
+        {
+            // Exit
+            if (event.type == sfEvtClosed)
+                sfRenderWindow_close(window);
+        }
+        sfRenderWindow_clear(window, sfBlack);
+        sfRenderWindow_drawSprite(window, sprite, NULL);
+        sfRenderWindow_display(window);
+    }
+
+    sfSprite_destroy(sprite);
+    sfTexture_destroy(texture);
+    sfRenderWindow_destroy(window);
 	free(img);
 	free(result);
-	fclose(file);
 	return 0;
 }

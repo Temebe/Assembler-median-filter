@@ -11,7 +11,7 @@ main.o: main.c
 median.o: median.asm
 	$(ASM) $(AFLAGS) median.asm
 result: main.o median.o
-	$(CC) $(CFLAGS) main.o median.o -o result
+	$(CC) $(CFLAGS) main.o median.o -o result -lcsfml-graphics -lcsfml-window
 clean: 
 	rm *.o
 	rm result

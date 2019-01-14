@@ -534,6 +534,7 @@ right_up_corner:
 end:
 	;call write_pixel
 	;pop ebx ;for a moment just to finish code
+	call write_pixel
 	pop ebx
 	pop ebp
 	ret
